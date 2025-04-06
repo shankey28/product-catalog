@@ -1,0 +1,377 @@
+<!-- File: index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Product Catalog</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: Arial, sans-serif;
+    }
+    
+    body {
+      margin: 0;
+      padding: 20px;
+      background-color: #f5f5f5;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    
+    header {
+      margin-bottom: 30px;
+    }
+    
+    h1 {
+      color: #333;
+    }
+    
+    .search-container {
+      margin-bottom: 20px;
+    }
+    
+    .search-input {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 16px;
+    }
+    
+    .search-input:focus {
+      outline: none;
+      border-color: #4a90e2;
+      box-shadow: 0 0 5px rgba(74, 144, 226, 0.3);
+    }
+    
+    .no-results {
+      text-align: center;
+      padding: 40px;
+      background: white;
+      border-radius: 8px;
+      color: #666;
+    }
+    
+    .products-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 20px;
+    }
+    
+    .product-card {
+      background: white;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      transition: transform 0.3s ease;
+      cursor: pointer;
+    }
+    
+    .product-card:hover {
+      transform: translateY(-5px);
+    }
+    
+    .product-image {
+      height: 200px;
+      background-color: #eee;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .product-image img {
+      max-width: 80%;
+      max-height: 80%;
+    }
+    
+    .product-info {
+      padding: 15px;
+    }
+    
+    .product-name {
+      margin: 0 0 10px 0;
+      font-size: 18px;
+    }
+    
+    .product-price {
+      font-weight: bold;
+      color: #e63946;
+    }
+    
+    .product-detail {
+      display: none;
+      padding: 20px;
+      background: white;
+      border-radius: 8px;
+      margin-top: 30px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+    
+    .product-detail-header {
+      display: flex;
+      margin-bottom: 20px;
+    }
+    
+    .product-detail-image {
+      width: 300px;
+      height: 300px;
+      background-color: #eee;
+      margin-right: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .product-detail-info {
+      flex: 1;
+    }
+    
+    .product-detail-name {
+      margin-top: 0;
+    }
+    
+    .product-detail-price {
+      font-size: 24px;
+      font-weight: bold;
+      color: #e63946;
+      margin-bottom: 20px;
+    }
+    
+    .product-description {
+      margin-bottom: 20px;
+      line-height: 1.6;
+    }
+    
+    .product-specs {
+      background-color: #f5f5f5;
+      padding: 15px;
+      border-radius: 5px;
+    }
+    
+    .specs-title {
+      margin-top: 0;
+      font-size: 18px;
+    }
+    
+    .spec-item {
+      margin-bottom: 8px;
+    }
+    
+    .back-button {
+      display: inline-block;
+      margin-bottom: 15px;
+      padding: 8px 15px;
+      background-color: #333;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    
+    .back-button:hover {
+      background-color: #555;
+    }
+    
+    .loading {
+      text-align: center;
+      padding: 40px;
+      font-size: 18px;
+      color: #666;
+    }
+    
+    /* Responsive adjustments for mobile */
+    @media (max-width: 768px) {
+      .product-detail-header {
+        flex-direction: column;
+      }
+      
+      .product-detail-image {
+        width: 100%;
+        margin-right: 0;
+        margin-bottom: 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Product Catalog</h1>
+    </header>
+    
+    <main>
+      <div id="products-list">
+        <div class="search-container">
+          <input type="text" id="search-input" class="search-input" placeholder="Search products...">
+        </div>
+        
+        <div class="loading">Loading products...</div>
+        <div class="products-grid" id="products-grid"></div>
+        <div id="no-results" class="no-results" style="display: none;">
+          No products match your search criteria.
+        </div>
+      </div>
+      
+      <div id="product-detail" class="product-detail">
+        <button class="back-button" id="back-button">Back to Products</button>
+        <div id="detail-content"></div>
+      </div>
+    </main>
+  </div>
+  
+  <script>
+    const API_URL = 'http://localhost:3000/api';
+    const productsGrid = document.getElementById('products-grid');
+    const productsList = document.getElementById('products-list');
+    const productDetail = document.getElementById('product-detail');
+    const detailContent = document.getElementById('detail-content');
+    const backButton = document.getElementById('back-button');
+    const searchInput = document.getElementById('search-input');
+    const noResults = document.getElementById('no-results');
+    
+    // Store all products for filtering
+    let allProducts = [];
+    
+    // Fetch all products
+    async function fetchProducts() {
+      try {
+        const response = await fetch(`${API_URL}/products`);
+        if (!response.ok) {
+          throw new Error('Failed to fetch products');
+        }
+        
+        allProducts = await response.json();
+        displayProducts(allProducts);
+      } catch (error) {
+        console.error('Error:', error);
+        productsGrid.innerHTML = `<p>Error loading products: ${error.message}</p>`;
+      }
+    }
+    
+    // Display products in grid
+    function displayProducts(products) {
+      document.querySelector('.loading').style.display = 'none';
+      productsGrid.innerHTML = '';
+      
+      if (products.length === 0) {
+        noResults.style.display = 'block';
+        return;
+      }
+      
+      noResults.style.display = 'none';
+      
+      products.forEach(product => {
+        const productCard = document.createElement('div');
+        productCard.className = 'product-card';
+        productCard.innerHTML = `
+          <div class="product-image">
+            <img src="placeholder.png" alt="${product.name}">
+          </div>
+          <div class="product-info">
+            <h2 class="product-name">${product.name}</h2>
+            <div class="product-price">$${product.price.toFixed(2)}</div>
+          </div>
+        `;
+        
+        productCard.addEventListener('click', () => {
+          fetchProductDetail(product.id);
+        });
+        
+        productsGrid.appendChild(productCard);
+      });
+    }
+    
+    // Filter products based on search term
+    function filterProducts(searchTerm) {
+      searchTerm = searchTerm.toLowerCase().trim();
+      
+      if (!searchTerm) {
+        return allProducts; // Return all products if search is empty
+      }
+      
+      return allProducts.filter(product => 
+        product.name.toLowerCase().includes(searchTerm)
+      );
+    }
+    
+    // Fetch product detail
+    async function fetchProductDetail(productId) {
+      try {
+        detailContent.innerHTML = '<div class="loading">Loading product details...</div>';
+        productsList.style.display = 'none';
+        productDetail.style.display = 'block';
+        
+        const response = await fetch(`${API_URL}/products/${productId}`);
+        if (!response.ok) {
+          throw new Error('Failed to fetch product details');
+        }
+        
+        const product = await response.json();
+        displayProductDetail(product);
+      } catch (error) {
+        console.error('Error:', error);
+        detailContent.innerHTML = `<p>Error loading product details: ${error.message}</p>`;
+      }
+    }
+    
+    // Display product detail
+    function displayProductDetail(product) {
+      detailContent.innerHTML = `
+        <div class="product-detail-header">
+          <div class="product-detail-image">
+            <img src="placeholder.png" alt="${product.name}">
+          </div>
+          <div class="product-detail-info">
+            <h2 class="product-detail-name">${product.name}</h2>
+            <div class="product-detail-price">$${product.price.toFixed(2)}</div>
+            <div class="product-description">${product.description}</div>
+          </div>
+        </div>
+        
+        <div class="product-specs">
+          <h3 class="specs-title">Specifications</h3>
+          <div class="specs-list">
+            ${Object.entries(product.specs).map(([key, value]) => 
+              `<div class="spec-item"><strong>${formatSpecName(key)}:</strong> ${value}</div>`
+            ).join('')}
+          </div>
+        </div>
+      `;
+    }
+    
+    // Format spec names (camelCase to readable format)
+    function formatSpecName(name) {
+      return name
+        .replace(/([A-Z])/g, ' $1')
+        .replace(/^./, str => str.toUpperCase());
+    }
+    
+    // Search input event handler (with debounce)
+    let debounceTimeout;
+    searchInput.addEventListener('input', function() {
+      clearTimeout(debounceTimeout);
+      
+      debounceTimeout = setTimeout(() => {
+        const filteredProducts = filterProducts(this.value);
+        displayProducts(filteredProducts);
+      }, 300); // 300ms debounce delay
+    });
+    
+    // Back button event
+    backButton.addEventListener('click', () => {
+      productDetail.style.display = 'none';
+      productsList.style.display = 'block';
+      // Clear search when returning to product list
+      searchInput.value = '';
+      displayProducts(allProducts);
+    });
+    
+    // Initialize the application
+    fetchProducts();
+  </script>
+</body>
+</html>

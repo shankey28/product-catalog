@@ -1,0 +1,14 @@
+# Frontend Dockerfile
+FROM nginx:alpine
+
+# Copy the built files to nginx html directory
+COPY index.html /usr/share/nginx/html/
+COPY placeholder.png /usr/share/nginx/html/
+
+
+
+# Expose port
+EXPOSE 80
+
+# Start nginx
+CMD ["nginx", "-g", "daemon off;"]
