@@ -8,84 +8,149 @@ const port = 3000;
 app.use(cors());
 app.use(express.json());
 
-// Sample product data
-const products = [
-  { 
-    id: 1, 
-    name: 'Wireless Headphones', 
-    price: 89.99, 
-    image: 'headphones.jpg',
-    description: 'Premium wireless headphones with noise cancellation and 20-hour battery life.',
-    specs: {
-      color: 'Black',
-      connectivity: 'Bluetooth 5.0',
-      batteryLife: '20 hours'
+const tenantProducts = {
+  cust1: [
+    { 
+      id: 1, 
+      name: 'Premium Headphones', 
+      price: 299.99,
+      image: 'premium_headphones.jpg',
+      description: 'High-end headphones with superior sound quality and noise cancellation.',
+      specs: {
+        color: 'Black',
+        connectivity: 'Bluetooth 5.2',
+        batteryLife: '30 hours'
+      }
+    },
+    { 
+      id: 2, 
+      name: 'Luxury Smart Watch', 
+      price: 499.99,
+      image: 'luxury_smartwatch.jpg',
+      description: 'Luxury smartwatch with advanced health tracking and premium materials.',
+      specs: {
+        color: 'Gold',
+        display: 'AMOLED',
+        waterResistant: true
+      }
+    },
+    { 
+      id: 3, 
+      name: 'Pro Laptop', 
+      price: 1999.99,
+      image: 'pro_laptop.jpg',
+      description: 'Professional-grade laptop with high-performance specs.',
+      specs: {
+        processor: 'Intel i9',
+        ram: '32GB',
+        storage: '1TB SSD'
+      }
+    },
+    { 
+      id: 4, 
+      name: 'Premium Camera', 
+      price: 899.99,
+      image: 'premium_camera.jpg',
+      description: 'Professional mirrorless camera with 4K video.',
+      specs: {
+        sensor: 'Full Frame',
+        resolution: '45MP',
+        videoCapability: '4K 60fps'
+      }
+    },
+    { 
+      id: 5, 
+      name: 'Designer Tablet', 
+      price: 799.99,
+      image: 'designer_tablet.jpg',
+      description: 'High-end tablet with stylus support for creative professionals.',
+      specs: {
+        display: '12.9-inch Retina',
+        storage: '512GB',
+        pencilSupport: true
+      }
     }
-  },
-  { 
-    id: 2, 
-    name: 'Smart Watch', 
-    price: 199.99, 
-    image: 'smartwatch.jpg',
-    description: 'Fitness tracker with heart rate monitoring and sleep analysis.',
-    specs: {
-      color: 'Silver',
-      display: 'AMOLED',
-      waterResistant: true
+  ],
+  cust2: [
+    { 
+      id: 1, 
+      name: 'Basic Headphones', 
+      price: 89.99,
+      image: 'basic_headphones.jpg',
+      description: 'Affordable headphones with decent sound quality.',
+      specs: {
+        color: 'White',
+        connectivity: 'Wired',
+        batteryLife: 'N/A'
+      }
+    },
+    { 
+      id: 2, 
+      name: 'Economy Smart Watch', 
+      price: 99.99,
+      image: 'economy_smartwatch.jpg',
+      description: 'Budget-friendly smartwatch with essential features.',
+      specs: {
+        color: 'Black',
+        display: 'LCD',
+        waterResistant: false
+      }
+    },
+    { 
+      id: 3, 
+      name: 'Budget Laptop', 
+      price: 599.99,
+      image: 'budget_laptop.jpg',
+      description: 'Affordable laptop for everyday computing needs.',
+      specs: {
+        processor: 'Intel i3',
+        ram: '8GB',
+        storage: '256GB SSD'
+      }
+    },
+    { 
+      id: 4, 
+      name: 'Basic Camera', 
+      price: 299.99,
+      image: 'basic_camera.jpg',
+      description: 'Entry-level digital camera for hobbyists.',
+      specs: {
+        sensor: 'APS-C',
+        resolution: '24MP',
+        videoCapability: '1080p'
+      }
+    },
+    { 
+      id: 5, 
+      name: 'Student Tablet', 
+      price: 299.99,
+      image: 'student_tablet.jpg',
+      description: 'Affordable tablet perfect for students and casual users.',
+      specs: {
+        display: '10.2-inch LCD',
+        storage: '64GB',
+        pencilSupport: false
+      }
     }
-  },
-  { 
-    id: 3, 
-    name: 'Portable Power Bank', 
-    price: 49.99, 
-    image: 'powerbank.jpg',
-    description: '20000mAh high-capacity power bank with fast charging capability.',
-    specs: {
-      capacity: '20000mAh',
-      ports: 'USB-C, 2x USB-A',
-      fastCharging: true
-    }
-  },
-  { 
-    id: 4, 
-    name: 'Wireless Mouse', 
-    price: 29.99, 
-    image: 'mouse.jpg',
-    description: 'Ergonomic wireless mouse with adjustable DPI settings.',
-    specs: {
-      color: 'Grey',
-      connectivity: '2.4GHz wireless',
-      buttons: 6
-    }
-  },
-  { 
-    id: 5, 
-    name: 'Bluetooth Speaker', 
-    price: 79.99, 
-    image: 'speaker.jpg',
-    description: 'Portable Bluetooth speaker with 360° sound and IPX7 waterproof rating.',
-    specs: {
-      color: 'Blue',
-      connectivity: 'Bluetooth 5.0',
-      batteryLife: '12 hours'
-    }
-  }
-];
+  ]
+};
 
-// API endpoint for getting all products (with limited info)
+// Get tenant ID from environment variable
+const tenantId = process.env.TENANT_ID || 'cust1';
+
+// Modify products endpoint to use tenant-specific data
 app.get('/api/products', (req, res) => {
-  // Return only the necessary information for the product list
+  const products = tenantProducts[tenantId] || [];
   const productsList = products.map(({ id, name, price, image }) => ({ 
     id, name, price, image 
   }));
-  
   res.json(productsList);
 });
 
 // API endpoint for getting a specific product by ID
 app.get('/api/products/:id', (req, res) => {
   const id = parseInt(req.params.id);
-  const product = products.find(p => p.id === id);
+  const product = (tenantProducts[tenantId] || []).find(p => p.id === id);
   
   if (product) {
     res.json(product);

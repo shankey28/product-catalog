@@ -32,6 +32,7 @@ spec:
       containers:
       - name: backend
         image: 677276106411.dkr.ecr.us-east-1.amazonaws.com/product-catalog-backend:latest
+        imagePullPolicy: Always
         ports:
         - containerPort: 3000
         livenessProbe:
@@ -40,6 +41,9 @@ spec:
             port: 3000
           initialDelaySeconds: 15
           periodSeconds: 10
+        env:
+        - name: TENANT_ID
+          value: "cust1"
         resources:
           requests:
             cpu: 100m

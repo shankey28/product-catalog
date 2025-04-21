@@ -137,7 +137,7 @@ dist
 
 
 # Terraform files
-terraform/vpc-eks/.terraform/
+terraform/vpc-eks/.terraform/*
 .terraform/
 terraform.tfstate
 terraform.tfstate.*

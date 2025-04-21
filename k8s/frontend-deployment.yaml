@@ -4,11 +4,6 @@ metadata:
   name: frontend-deployment
 spec:
   replicas: 2
-  strategy:
-    type: RollingUpdate
-    rollingUpdate:
-      maxSurge: 1
-      maxUnavailable: 0
   selector:
     matchLabels:
       app: frontend
@@ -17,33 +12,15 @@ spec:
       labels:
         app: frontend
     spec:
-      affinity:
-        podAntiAffinity:
-          preferredDuringSchedulingIgnoredDuringExecution:
-          - weight: 100
-            podAffinityTerm:
-              labelSelector:
-                matchExpressions:
-                - key: app
-                  operator: In
-                  values:
-                  - frontend
-              topologyKey: topology.kubernetes.io/zone
       containers:
       - name: frontend
         image: 677276106411.dkr.ecr.us-east-1.amazonaws.com/product-catalog-frontend:latest
+        imagePullPolicy: Always
         ports:
         - containerPort: 80
         livenessProbe:
           httpGet:
-            path: /
+            path: /healthz
             port: 80
-          initialDelaySeconds: 15
-          periodSeconds: 10
-        resources:
-          requests:
-            cpu: 100m
-            memory: 128Mi
-          limits:
-            cpu: 250m
-            memory: 256Mi
+          initialDelaySeconds: 10
+          periodSeconds: 30

@@ -1,0 +1,44 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: product-catalog-ingress-cust1
+  namespace: cust1
+  annotations:
+    kubernetes.io/ingress.class: alb
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/subnets: subnet-0a4aecf493a5b6e58,subnet-096af12848361dfeb
+    alb.ingress.kubernetes.io/security-groups: sg-0cc23fc5247edc5bc
+    alb.ingress.kubernetes.io/group.name: product-catalog-alb
+    alb.ingress.kubernetes.io/group.order: '1'
+    alb.ingress.kubernetes.io/load-balancer-name: product-catalog-alb
+    alb.ingress.kubernetes.io/success-codes: '200-399'
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}]'
+    alb.ingress.kubernetes.io/target-group-attributes: deregistration_delay.timeout_seconds=30
+    alb.ingress.kubernetes.io/backend-protocol: HTTP
+    alb.ingress.kubernetes.io/healthcheck-interval-seconds: '15'
+    alb.ingress.kubernetes.io/healthcheck-timeout-seconds: '5'
+    alb.ingress.kubernetes.io/conditions.frontendservice-cust1: >-
+      [{"field":"path-pattern","pathPatternConfig":{"values":["/cust1"]}}]
+    alb.ingress.kubernetes.io/conditions.backendservice-cust1: >-
+      [{"field":"path-pattern","pathPatternConfig":{"values":["/cust1/api"]}}]
+    alb.ingress.kubernetes.io/healthcheck-path-backend: /health
+    alb.ingress.kubernetes.io/healthcheck-path-frontend: /healthz
+spec:
+  rules:
+  - http:
+      paths:
+      - path: /cust1/api
+        pathType: Prefix
+        backend:
+          service:
+            name: backend-service-cust1
+            port:
+              number: 3000
+      - path: /cust1
+        pathType: Prefix
+        backend:
+          service:
+            name: frontend-service-cust1
+            port:
+              number: 80
