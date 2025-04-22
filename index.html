@@ -224,13 +224,20 @@
   </div>
   
   <script>
-    // Configuration for API URL
+    // Get tenant from URL path
+    const tenant = window.location.pathname.split('/')[1];
+    console.log('Current tenant:', tenant);
+    
+    // Configuration for API URL with tenant
     window.CONFIG = {
-        API_URL: window.location.origin + '/api'  // This will automatically use the ALB domain
+        API_URL: `${window.location.origin}/${tenant}/api`
     };
+    console.log('API URL configured as:', window.CONFIG.API_URL);
   </script>
-  
+
   <script>
+    const CLOUDFRONT_URL = 'http://d3r83mbgd8tj05.cloudfront.net';
+
     // Replace the hardcoded API_URL with dynamic config
     const API_URL = window.CONFIG.API_URL;
 
@@ -248,15 +255,20 @@
     // Fetch all products
     async function fetchProducts() {
       try {
+        console.log('Fetching products from:', `${API_URL}/products`);
         const response = await fetch(`${API_URL}/products`);
+        console.log('API Response status:', response.status);
+        
         if (!response.ok) {
-          throw new Error('Failed to fetch products');
+          throw new Error(`HTTP error! status: ${response.status}`);
         }
         
-        allProducts = await response.json();
+        const data = await response.json();
+        console.log('Products received:', data);
+        allProducts = data;
         displayProducts(allProducts);
       } catch (error) {
-        console.error('Error:', error);
+        console.error('Error fetching products:', error);
         productsGrid.innerHTML = `<p>Error loading products: ${error.message}</p>`;
       }
     }
@@ -278,7 +290,8 @@
         productCard.className = 'product-card';
         productCard.innerHTML = `
           <div class="product-image">
-            <img src="placeholder.png" alt="${product.name}">
+            <img src="${product.image}" alt="${product.name}" 
+                 onerror="this.src='${CLOUDFRONT_URL}/images/placeholder.png'">
           </div>
           <div class="product-info">
             <h2 class="product-name">${product.name}</h2>
@@ -332,7 +345,8 @@
       detailContent.innerHTML = `
         <div class="product-detail-header">
           <div class="product-detail-image">
-            <img src="placeholder.png" alt="${product.name}">
+            <img src="${product.image}" alt="${product.name}" 
+                 onerror="this.src='${CLOUDFRONT_URL}/images/placeholder.png'">
           </div>
           <div class="product-detail-info">
             <h2 class="product-detail-name">${product.name}</h2>
@@ -379,6 +393,10 @@
       displayProducts(allProducts);
     });
     
+    // Add tenant to page title
+    document.title = `${tenant.toUpperCase()} - Product Catalog`;
+    document.querySelector('h1').textContent = `${tenant.toUpperCase()} Product Catalog`;
+
     // Initialize the application
     fetchProducts();
   </script>

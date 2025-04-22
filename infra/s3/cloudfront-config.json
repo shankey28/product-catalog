@@ -1,0 +1,92 @@
+{
+    "CallerReference": "product-catalog-images-1",
+    "Aliases": {
+        "Quantity": 0,
+        "Items": []
+    },
+    "DefaultRootObject": "index.html",
+    "Origins": {
+        "Quantity": 1,
+        "Items": [
+            {
+                "Id": "S3-product-images",
+                "DomainName": "prod-catalog-images.s3.amazonaws.com",
+                "OriginPath": "",
+                "CustomHeaders": {
+                    "Quantity": 0
+                },
+                "S3OriginConfig": {
+                    "OriginAccessIdentity": "origin-access-identity/cloudfront/E19KNSUYIZDJN4"
+                }
+            }
+        ]
+    },
+    "DefaultCacheBehavior": {
+        "TargetOriginId": "S3-product-images",
+        "ForwardedValues": {
+            "QueryString": false,
+            "Cookies": {
+                "Forward": "none"
+            },
+            "Headers": {
+                "Quantity": 0
+            },
+            "QueryStringCacheKeys": {
+                "Quantity": 0
+            }
+        },
+        "TrustedSigners": {
+            "Enabled": false,
+            "Quantity": 0
+        },
+        "ViewerProtocolPolicy": "allow-all",
+        "MinTTL": 0,
+        "AllowedMethods": {
+            "Quantity": 2,
+            "Items": [
+                "HEAD",
+                "GET"
+            ],
+            "CachedMethods": {
+                "Quantity": 2,
+                "Items": [
+                    "HEAD",
+                    "GET"
+                ]
+            }
+        },
+        "SmoothStreaming": false,
+        "DefaultTTL": 86400,
+        "MaxTTL": 31536000,
+        "Compress": true,
+        "FieldLevelEncryptionId": ""
+    },
+    "CacheBehaviors": {
+        "Quantity": 0
+    },
+    "CustomErrorResponses": {
+        "Quantity": 0
+    },
+    "Comment": "Distribution for product catalog images",
+    "Logging": {
+        "Enabled": false,
+        "IncludeCookies": false,
+        "Bucket": "",
+        "Prefix": ""
+    },
+    "PriceClass": "PriceClass_100",
+    "Enabled": true,
+    "ViewerCertificate": {
+        "CloudFrontDefaultCertificate": true,
+        "MinimumProtocolVersion": "TLSv1",
+        "CertificateSource": "cloudfront"
+    },
+    "Restrictions": {
+        "GeoRestriction": {
+            "RestrictionType": "none",
+            "Quantity": 0
+        }
+    },
+    "HttpVersion": "http2",
+    "IsIPV6Enabled": true
+}
